@@ -1,0 +1,6 @@
+paket-files/
+obj/
+node_modules/
+dist/
+
+yarn-error.log
