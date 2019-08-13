@@ -4,7 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="App.fs" />
+    <Compile Include="ElmishToReact.fs" />
+    <Compile Include="Example.fs" />
   </ItemGroup>
   <Import Project=".paket\Paket.Restore.targets" />
 </Project>

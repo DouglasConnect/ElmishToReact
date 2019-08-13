@@ -1,7 +1,6 @@
-module ElmishToReact.Example
+module ElmishToReact
 
 open Fable.Core
-open Fable.Import
 open Elmish
 
 module Rxjs =
@@ -11,14 +10,12 @@ module Rxjs =
   [<Import("Subject", from="rxjs")>]
   let Subject : obj = jsNative
 
-  type ISubject<'a> =
-    interface
-      inherit System.IObservable<'a>
-      abstract next : 'a -> unit
-    end
+  type RxSubject<'a> =
+    abstract next : 'a -> unit
+    abstract subscribe : ('a -> unit) -> unit
 
-  let subject<'a> : ISubject<'a> =
-    createNew Subject () :?> ISubject<'a>
+  let subject<'a> : RxSubject<'a> =
+    createNew Subject () :?> RxSubject<'a>
 
 type Reactified<'props, 'model, 'msg> =
   private { Program : Program<'props, 'model, 'msg, Fable.React.ReactElement>
@@ -42,7 +39,10 @@ module Reactified =
 
   let runWith (props : 'props) (el : Browser.Types.Element ) (reactified : Reactified<'props, 'model, 'msg>) : 'props -> unit =
 
-    let subject : Rxjs.ISubject<'props> = Rxjs.subject
+    // TODO: this next line is very hacky :(
+    el.id <- "myid"
+
+    let subject : Rxjs.RxSubject<'props> = Rxjs.subject
 
     let subscription (initial : 'model) : Cmd<'msg> =
       match reactified.PropsToMsg with
@@ -52,8 +52,10 @@ module Reactified =
           let callback props =
             propsToMsg props |> dispatch
 
-          Observable.subscribe callback subject |> ignore
+          // TODO: subscribe returns an unsubscribe func
+          subject.subscribe callback
 
+        // TODO: Also subscribe to the unmount hook
         Cmd.ofSub sub
 
       | None ->
@@ -92,52 +94,3 @@ module ElmishComponent =
 
       div [ RefValue divRef ] []
     )
-
-
-type Props =
-  { Label : string }
-
-type Model =
-  { Count : int
-    Props : Props }
-
-type Msg =
-  | Increment
-  | Decrement
-  | UpdateProps of Props
-  | Unmount
-
-let init props =
-  { Count = 0
-    Props = props }
-
-let update msg model =
-  match msg with
-  | Increment -> { model with Count = model.Count + 1 }
-  | Decrement -> { model with Count = model.Count - 1 }
-  | UpdateProps props -> { model with Props = props }
-  | Unmount ->
-    Browser.Dom.console.log "unmount msg received"
-    model
-
-open Fable.React
-open Fable.React.Props
-
-let view count dispatch =
-  let onClick msg =
-    OnClick <| fun _ -> msg |> dispatch
-
-  div []
-    [ button [ onClick Decrement ] [ str "-" ]
-      div [] [ str (string count) ]
-      button [ onClick Increment ] [ str "+" ] ]
-
-
-let program = Program.mkSimple init update view
-
-let reactifiedProgram =
-  Reactified.reactify program
-  |> Reactified.withPropsMsg UpdateProps
-  |> Reactified.withUnmountMsg Unmount
-
-let ExampleComponent = ElmishComponent.elmishToReact reactifiedProgram

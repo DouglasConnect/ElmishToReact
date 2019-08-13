@@ -15,7 +15,7 @@ var babelOptions = {
 
 module.exports = {
     devtool: "source-map",
-    entry: './App.fsproj',
+    entry: './example.js',
     mode: "development",
     output: {
         path: path.join(__dirname, 'dist'),
