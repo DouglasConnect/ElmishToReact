@@ -1,7 +1,8 @@
-module ElmishToReact.Example
+module Example
 
 open Fable.Core
 open Elmish
+open ElmishToReact
 
 type Props =
   [<Emit("$0.label")>] abstract Label : string
