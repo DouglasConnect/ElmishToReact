@@ -22,6 +22,21 @@ type Reactified<'props, 'model, 'msg> =
             PropsToMsg : ('props -> 'msg) option
             UnmountCmd : Cmd<'msg> }
 
+module Program =
+
+  open Fable.React
+  open Elmish.React
+
+  let withReactSynchronousOnElement element (program: Elmish.Program<_,_,_,_>) =
+    let setState model dispatch =
+      ReactDom.render(
+        lazyView2With (fun x y -> obj.ReferenceEquals(x,y)) (Program.view program) model dispatch,
+        element
+      )
+
+    program
+    |> Program.withSetState setState
+
 module Reactified =
 
   open Elmish.React
@@ -38,9 +53,6 @@ module Reactified =
     { reactified with UnmountCmd = Cmd.ofMsg msgType }
 
   let runWith (props : 'props) (el : Browser.Types.Element ) (reactified : Reactified<'props, 'model, 'msg>) : 'props -> unit =
-
-    // TODO: this next line is very hacky :(
-    el.id <- "myid"
 
     let subject : Rxjs.RxSubject<'props> = Rxjs.subject
 
@@ -61,10 +73,10 @@ module Reactified =
       | None ->
         Cmd.none
 
-
     reactified.Program
     |> Program.withSubscription subscription
-    |> Program.withReactSynchronous el.id
+    |> Program.withReactSynchronousOnElement el
+    |> Program.withSetState setState
     |> Program.runWith props
 
     subject.next
