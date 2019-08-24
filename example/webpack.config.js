@@ -26,7 +26,7 @@ module.exports = {
         modules: ["node_modules"]
     },
     devServer: {
-        contentBase: "./public",
+        contentBase: path.join(__dirname, "public"),
         hot: true,
     },
     module: {

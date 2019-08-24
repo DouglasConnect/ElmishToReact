@@ -20,7 +20,7 @@ module Rxjs =
 type Reactified<'props, 'model, 'msg> =
   private { Program : Program<'props, 'model, 'msg, Fable.React.ReactElement>
             PropsToMsg : ('props -> 'msg) option
-            UnmountCmd : Cmd<'msg> }
+            UnmountMsg : 'msg option }
 
 module Program =
 
@@ -44,42 +44,51 @@ module Reactified =
   let reactify program =
     { Program = program
       PropsToMsg = None
-      UnmountCmd = Cmd.none }
+      UnmountMsg = None }
 
   let withPropsMsg (msgType: 'props -> 'msg) (reactified : Reactified<'props, 'model, 'msg>) =
-    { reactified with PropsToMsg = msgType |> Some }
+    { reactified with PropsToMsg = Some msgType }
 
   let withUnmountMsg (msgType: 'msg) (reactified : Reactified<'props, 'model, 'msg>) =
-    { reactified with UnmountCmd = Cmd.ofMsg msgType }
+    { reactified with UnmountMsg = Some msgType }
 
-  let runWith (props : 'props) (el : Browser.Types.Element ) (reactified : Reactified<'props, 'model, 'msg>) : 'props -> unit =
+  type Controls<'props> =
+    { Update : 'props -> unit
+      Unmount : unit -> unit }
 
-    let subject : Rxjs.RxSubject<'props> = Rxjs.subject
+  let runWith (props : 'props) (el : Browser.Types.Element ) (reactified : Reactified<'props, 'model, 'msg>) : Controls<'props> =
+
+    let updateSubject : Rxjs.RxSubject<'props> = Rxjs.subject
+    let unmountSubject : Rxjs.RxSubject<unit> = Rxjs.subject
 
     let subscription (initial : 'model) : Cmd<'msg> =
-      match reactified.PropsToMsg with
-      | Some propsToMsg ->
-        let sub (dispatch : 'msg -> unit) : unit =
+      let sub (dispatch : 'msg -> unit) : unit =
 
-          let callback props =
-            propsToMsg props |> dispatch
+        match reactified.PropsToMsg with
+        | Some propsToMsg ->
 
+            let callback props =
+              propsToMsg props |> dispatch
+
+            // TODO: subscribe returns an unsubscribe func
+            updateSubject.subscribe callback
+        | None -> ()
+
+        match reactified.UnmountMsg with
+        | Some msg ->
           // TODO: subscribe returns an unsubscribe func
-          subject.subscribe callback
+          unmountSubject.subscribe (fun () -> dispatch msg)
+        | None -> ()
 
-        // TODO: Also subscribe to the unmount hook
-        Cmd.ofSub sub
-
-      | None ->
-        Cmd.none
+      Cmd.ofSub sub
 
     reactified.Program
     |> Program.withSubscription subscription
     |> Program.withReactSynchronousOnElement el
-    |> Program.withSetState setState
     |> Program.runWith props
 
-    subject.next
+    { Update = updateSubject.next
+      Unmount = unmountSubject.next }
 
 module ElmishComponent =
 
@@ -89,17 +98,18 @@ module ElmishComponent =
   let elmishToReact (program : Reactified<'props, 'model, 'msg>) =
     FunctionComponent.Of( fun (props: 'props) ->
       let divRef : IRefValue<Browser.Types.Element option> = Hooks.useRef(None)
-      let onUpdateRef : IRefValue<('props -> unit) option> = Hooks.useRef(None)
+      let controlsRef : IRefValue<(Reactified.Controls<'props>) option> = Hooks.useRef(None)
 
       let subscription () =
         match divRef.current with
         | Some el ->
-          let onUpdate =
-            match onUpdateRef.current with
-            | Some fn -> fn
+          let controls =
+            match controlsRef.current with
+            | Some c -> c
             | None -> Reactified.runWith props el program
 
-          onUpdate props
+          controlsRef.current <- Some controls
+          controls.Update props
         | None -> ()
 
       Hooks.useEffect subscription
