@@ -5,26 +5,35 @@ open Elmish
 open ElmishToReact
 
 type Props =
-  [<Emit("$0.label")>] abstract Label : string
+  [<Emit("$0.count")>] abstract Count : int
+  abstract setCount : int -> unit
 
 type Model =
-  { Count : int
+  { InternalCount : int
     Props : Props }
 
 type Msg =
-  | Increment
-  | Decrement
+  | IncrementInternal
+  | DecrementInternal
+  | IncrementExternal
+  | DecrementExternal
   | UpdateProps of Props
   | Unmount
 
 let init props =
-  { Count = 0
+  { InternalCount = 0
     Props = props }
 
 let update msg model =
   match msg with
-  | Increment -> { model with Count = model.Count + 1 }
-  | Decrement -> { model with Count = model.Count - 1 }
+  | IncrementInternal -> { model with InternalCount = model.InternalCount + 1 }
+  | DecrementInternal -> { model with InternalCount = model.InternalCount - 1 }
+  | IncrementExternal ->
+      model.Props.setCount (model.Props.Count + 1)
+      model
+  | DecrementExternal ->
+      model.Props.setCount (model.Props.Count - 1)
+      model
   | UpdateProps props -> { model with Props = props }
   | Unmount ->
     Browser.Dom.console.log "unmount msg received"
@@ -37,11 +46,18 @@ let view model dispatch =
   let onClick msg =
     OnClick <| fun _ -> msg |> dispatch
 
-  fragment []
-    [ div [] [ str model.Props.Label ]
-      button [ onClick Decrement ] [ str "-" ]
-      div [] [ str (string model.Count) ]
-      button [ onClick Increment ] [ str "+" ] ]
+  div [ ClassName "elmish" ]
+    [ h3 [] [ str "The elmish program" ]
+      p []
+        [ str "This is the internal counter. Current value is stored in the elmish model: "
+          button [ onClick DecrementInternal ] [ str "-" ]
+          str (sprintf " %i "  model.InternalCount)
+          button [ onClick IncrementInternal ] [ str "+" ] ]
+      p []
+        [ str "This is the external counter. Current value is passed to elmish program via React props:"
+          button [ onClick DecrementExternal ] [ str "-" ]
+          str (sprintf " %i "  model.Props.Count)
+          button [ onClick IncrementExternal ] [ str "+" ] ] ]
 
 
 let program = Program.mkSimple init update view

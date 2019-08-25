@@ -104,10 +104,6 @@ module ElmishComponent =
   open Fable.React
   open Fable.React.Props
 
-  let mapToDisposable (f : unit -> unit) : System.IDisposable =
-    { new System.IDisposable
-      with member this.Dispose() = f() }
-
   let elmishToReact (program : Externalised<'props, 'model, 'msg>) =
     FunctionComponent.Of( fun (props: 'props) ->
       let divRef : IRefValue<Browser.Types.Element option> = Hooks.useRef(None)
@@ -123,12 +119,20 @@ module ElmishComponent =
 
           controlsRef.current <- Some controls
           controls.Update props
-
-          controls.Unmount
         | None ->
-          ignore
+          ()
 
-      Hooks.useEffectDisposable (subscription >> mapToDisposable)
+      let unmount () =
+        let cleanup () =
+          match controlsRef.current with
+          | Some controls -> controls.Unmount()
+          | None -> ()
+
+        { new System.IDisposable
+          with member this.Dispose() = cleanup() }
+
+      Hooks.useEffect subscription
+      Hooks.useEffectDisposable (unmount, [||])
 
       div [ RefValue divRef ] []
     )
