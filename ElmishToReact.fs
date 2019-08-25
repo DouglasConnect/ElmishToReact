@@ -142,3 +142,6 @@ module ElmishComponent =
 
       div [ RefValue divRef ] []
     )
+
+  let elmishToReactSimple =
+    Externalised.externalise >> elmishToReact
