@@ -37,6 +37,8 @@ module Program =
     program
     |> Program.withSetState setState
 
+  let unmount = ReactDom.unmountComponentAtNode
+
 type Externalised<'props, 'model, 'msg> =
   private { Program : Program<'props, 'model, 'msg, Fable.React.ReactElement>
             PropsToMsg : ('props -> 'msg) option
@@ -96,8 +98,12 @@ module Externalised =
     |> Program.withReactSynchronousOnElement el
     |> Program.runWith props
 
+    let unmount () =
+      subject.complete()
+      Program.unmount el |> ignore
+
     { Update = subject.next
-      Unmount = subject.complete }
+      Unmount = unmount }
 
 module ElmishComponent =
 
