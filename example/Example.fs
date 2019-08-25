@@ -46,9 +46,9 @@ let view model dispatch =
 
 let program = Program.mkSimple init update view
 
-let reactifiedProgram =
-  Reactified.reactify program
-  |> Reactified.withPropsMsg UpdateProps
-  |> Reactified.withUnmountMsg Unmount
+let externalisedProgram =
+  Externalised.externalise program
+  |> Externalised.withPropsMsg UpdateProps
+  |> Externalised.withUnmountMsg Unmount
 
-let ExampleComponent = ElmishComponent.elmishToReact reactifiedProgram
+let ExampleComponent = ElmishComponent.elmishToReact externalisedProgram
