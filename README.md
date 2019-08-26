@@ -17,7 +17,7 @@ let myProgram = Program.mkProgram init update view
 ### Step 2: Wrap your program into a React component
 
 ```F#
-open ElmishToReact.ElmishComponent
+open Fable.Elmish.ElmishToReact
 let MyProgramComponent = elmishToReactSimple myProgram
 ```
 
@@ -73,13 +73,13 @@ let program = Program.mkProgram init update view
 Next we "externalise" our program. This allows us to externally feed a props message into the Elmish program:
 
 ```F#
-open ElmishToReact
+open Fable.Elmish.ElmishToReact
 
 let externalisedProgram =
   Externalised.externalise program
   |> Externalised.withPropsMsg UpdateProps
 
-let MyProgramComponent = ElmishComponent.elmishToReact externalisedProgram
+let MyProgramComponent = elmishToReact externalisedProgram
 ```
 
 In our javascript code we can pass the props into our wrapped program:
@@ -115,7 +115,7 @@ let program = Program.mkProgram init update view
 Next we add the Unmount message to our externalised program.
 
 ```F#
-open ElmishToReact
+open Fable.Elmish.ElmishToReact
 
 let externalisedProgram =
   Externalised.externalise program
@@ -136,8 +136,12 @@ To run the example....
 
 ...and open [http://localhost:8080](http://localhost:8080) in your web browser
 
-## Installation
+## Installation with npm
 
     npm install --save-dev elmish-to-react
-    dotnet add reference ./node_modules/elmish-to-react/ElmishToReact.fsproj
+    dotnet add reference ./node_modules/elmish-to-react/Fable.Elmish.ElmishToReact.fsproj
     dotnet restore
+
+## Installation with paket
+
+    paket add nuget Fable.Elmish.ElmishToReact -i

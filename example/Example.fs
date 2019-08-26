@@ -2,7 +2,7 @@ module Example
 
 open Fable.Core
 open Elmish
-open ElmishToReact
+open Fable.Elmish.ElmishToReact
 
 type Props =
   [<Emit("$0.count")>] abstract Count : int
@@ -67,4 +67,4 @@ let externalisedProgram =
   |> Externalised.withPropsMsg UpdateProps
   |> Externalised.withUnmountMsg Unmount
 
-let ExampleComponent = ElmishComponent.elmishToReact externalisedProgram
+let ExampleComponent = elmishToReact externalisedProgram

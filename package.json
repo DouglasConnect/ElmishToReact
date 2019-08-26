@@ -1,7 +1,7 @@
 {
   "name": "elmish-to-react",
   "version": "1.0.0-alpha",
-  "description": "Wrap an Elmish program as a React element",
+  "description": "Wrap an Elmish program as a React component",
   "main": "ElmishToReact.fsproj",
   "license": "MIT",
   "scripts": {

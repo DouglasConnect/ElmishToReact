@@ -1,4 +1,4 @@
-namespace ElmishToReact
+namespace Fable.Elmish.ElmishToReact
 
 open Fable.Core
 open Elmish
@@ -105,6 +105,8 @@ module Externalised =
     { Update = subject.next
       Unmount = unmount }
 
+
+[<AutoOpen>]
 module ElmishComponent =
 
   open Fable.React
@@ -143,5 +145,5 @@ module ElmishComponent =
       div [ RefValue divRef ] []
     )
 
-  let elmishToReactSimple =
+  let elmishToReactSimple<'props, 'model, 'msg> =
     Externalised.externalise >> elmishToReact
