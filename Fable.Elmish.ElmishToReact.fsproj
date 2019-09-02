@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Title>Elmish to React</Title>
+    <Description>Wrap a Fable Elmish program as a React component</Description>
+    <RepositoryUrl>https://github.com/DouglasConnect/ElmishToReact.git</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>fsharp;fable;elmish;react</PackageTags>
+    <Authors>Ian Streeter</Authors>
+    <Company>Edelweiss Connect</Company>
+    <Version>0.0.1</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NpmDependencies>
+      <NpmPackage Name="rxjs" Version=">= 6.5"/>
+    </NpmDependencies>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ElmishToReact.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="*.fsproj; *.fs;" PackagePath="fable\" />
   </ItemGroup>
   <Import Project=".paket\Paket.Restore.targets" />
 </Project>

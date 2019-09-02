@@ -1,9 +1,15 @@
 {
   "name": "elmish-to-react",
-  "version": "1.0.0-alpha",
+  "version": "0.0.2",
   "description": "Wrap an Elmish program as a React component",
-  "main": "ElmishToReact.fsproj",
+  "keywords": ["react", "elmish", "fable"],
+  "browser": "ElmishToReact.fsproj",
+  "homepage": "https://github.com/DouglasConnect/ElmishToReact",
+  "repository": "github:DouglasConnect/ElmishToReact",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DouglasConnect/ElmishToReact/issues"
+  },
   "scripts": {
     "build": "webpack --config example/webpack.config.js --context example",
     "start": "webpack-dev-server --watch --config example/webpack.config.js --context example"
