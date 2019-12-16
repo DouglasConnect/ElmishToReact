@@ -2,7 +2,11 @@
   "name": "elmish-to-react",
   "version": "0.0.2",
   "description": "Wrap an Elmish program as a React component",
-  "keywords": ["react", "elmish", "fable"],
+  "keywords": [
+    "react",
+    "elmish",
+    "fable"
+  ],
   "browser": "ElmishToReact.fsproj",
   "homepage": "https://github.com/DouglasConnect/ElmishToReact",
   "repository": "github:DouglasConnect/ElmishToReact",
