@@ -66,5 +66,6 @@ let externalisedProgram =
   Externalised.externalise program
   |> Externalised.withPropsMsg UpdateProps
   |> Externalised.withUnmountMsg Unmount
+  |> Externalised.withClassName "example-class"
 
 let ExampleComponent = elmishToReact externalisedProgram

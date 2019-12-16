@@ -42,7 +42,8 @@ module Program =
 type Externalised<'props, 'model, 'msg> =
   private { Program : Program<'props, 'model, 'msg, Fable.React.ReactElement>
             PropsToMsg : ('props -> 'msg) option
-            UnmountMsg : 'msg option }
+            UnmountMsg : 'msg option
+            ClassName : string option }
 
 module Externalised =
 
@@ -52,13 +53,17 @@ module Externalised =
   let externalise program =
     { Program = program
       PropsToMsg = None
-      UnmountMsg = None }
+      UnmountMsg = None
+      ClassName = None }
 
   let withPropsMsg (msgType: 'props -> 'msg) (externalised : Externalised<'props, 'model, 'msg>) =
     { externalised with PropsToMsg = Some msgType }
 
   let withUnmountMsg (msgType: 'msg) (externalised : Externalised<'props, 'model, 'msg>) =
     { externalised with UnmountMsg = Some msgType }
+
+  let withClassName (className : string) (externalised : Externalised<'props, 'model, 'msg>) =
+    { externalised with ClassName = Some className }
 
   type Controls<'props> =
     { Update : 'props -> unit
@@ -142,7 +147,14 @@ module ElmishComponent =
       Hooks.useEffect subscription
       Hooks.useEffectDisposable (unmount, [||])
 
-      div [ RefValue divRef ] []
+      let divProps : IHTMLProp list =
+        [ yield RefValue divRef
+          match program.ClassName with
+          | Some className ->
+              yield ClassName className
+          | _ -> () ]
+
+      div divProps []
     )
 
   let elmishToReactSimple<'props, 'model, 'msg> =
